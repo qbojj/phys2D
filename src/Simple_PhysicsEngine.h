@@ -5,5 +5,5 @@
 
 class Simple_PhysicsEngine : public IPhysicsEngine {
 public:
-    void onTick( std::vector<PhysicsObject> & ) override;
+    void onTick( std::vector<PhysicsObject> &objs, double dt ) override;
 };

@@ -9,5 +9,5 @@ int main()
         std::make_unique<GL3_GuiRenderer>(),
         std::make_unique<Simple_PhysicsEngine>() );
     
-    return app.run();
+    app.run();
 }

@@ -5,11 +5,13 @@
 class IGuiRenderer {
 public:
     virtual ~IGuiRenderer() = default;
-    virtual void onDraw( std::vector<PhysicsObject> & ) = 0;
+
+    // return false if should close
+    virtual bool onDraw( std::vector<PhysicsObject> &objs, double dt ) = 0;
 };
 
 class IPhysicsEngine {
 public:
     virtual ~IPhysicsEngine() = default;
-    virtual void onTick( std::vector<PhysicsObject> & ) = 0;
+    virtual void onTick( std::vector<PhysicsObject> &objs, double dt ) = 0;
 };

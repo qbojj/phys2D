@@ -12,5 +12,5 @@ public:
         : gui(std::move(gui))
         , engine(std::move(engine)) {}
     
-    int run();
+    void run();
 };

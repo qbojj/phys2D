@@ -2,7 +2,7 @@
 #include <vector>
 #include "PhysicsObject.h"
 
-void Simple_PhysicsEngine::onTick( std::vector<PhysicsObject> &objs )
+void Simple_PhysicsEngine::onTick( std::vector<PhysicsObject> &objs, double dt )
 {
 
 }
