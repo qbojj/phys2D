@@ -1,5 +1,17 @@
+# Jakub Janeczko
+# konfiguracja kompilacji projektu
+# 28.05.2023
+#
+# wymagany jest kompilator C++ (MSVC / GCC / CLANG) oraz cmake >= 3.20
+# by zkompilować projekt:
+#
+# mkdir build
+# cd build
+# cmake -DCMAKE_BUILD_TYPE=Release ..
+# cmake --build .
+
 cmake_minimum_required(VERSION 3.20)
-project( phys2D )
+project( phys2D C CXX )
 
 set( GLFW_BUILD_DOCS OFF )
 set( GLFW_INSTALL OFF )
