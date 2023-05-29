@@ -61,9 +61,9 @@ GL3_Renderer::GL3_Renderer()
 {
     if( !glfwInit() ) throw std::runtime_error("glfw could not be initialized");
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
     glfwWindowHint(GLFW_SAMPLES, 16);
 
