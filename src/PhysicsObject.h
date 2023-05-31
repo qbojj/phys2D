@@ -19,8 +19,8 @@ public:
     glm::dvec2 a, b;
 
     double signed_distance( const glm::dvec2 &p ) const;
-    
-    glm::dvec2 point_closest( const glm::dvec2 &p ) const;
+
+    glm::dvec2 get_normal() const;
 };
 
 /**
@@ -46,10 +46,11 @@ public:
     PhysicsObject(std::vector<glm::dvec2> point_cloud, double density, uint32_t flags = 0 );
 
     std::vector<glm::dvec2> points; ///< offsets to center
-    double mass, moment_of_intertia;
+    double inv_mass; ///< inverse of mass
+    double inv_moment_of_intertia; ///< inverse of moment of inertia
     
     glm::dvec2 center; ///< location of the cenroid of the object
-    glm::dvec2 velocity;
+    glm::dvec2 velocity; ///< velocity
     double angle; ///< accumulated angle
     double ang_velocity; ///< angular velocity
 
@@ -90,3 +91,8 @@ public:
      */
     bool is_point_inside_object( const glm::dvec2 &p ) const;
 };
+
+inline double vec_cross( const glm::dvec2 &a, const glm::dvec2 &b )
+{
+    return a.x*b.y - a.y*b.x;
+}

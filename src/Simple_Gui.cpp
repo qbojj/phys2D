@@ -1,3 +1,9 @@
+/*
+Jakub Janeczko
+klasa GUI
+30.05.2023
+*/
+
 #include "Simple_Gui.h"
 
 #include <glm/glm.hpp>
@@ -55,8 +61,8 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
             PhysicsObject &obj = objs[object_idx];
 
             ImGui::Value("index", object_idx);
-            ImGui::Value("mass", (float)obj.mass);
-            ImGui::Value("moment of inertia", (float)obj.moment_of_intertia);
+            ImGui::Value("inv mass", (float)obj.inv_mass);
+            ImGui::Value("inv moment of inertia", (float)obj.inv_moment_of_intertia);
             ImGui::Text("center: %g, %g", obj.center.x, obj.center.y );
             ImGui::Text("angle: %g", obj.angle);
             ImGui::Text("velocity: %g, %g", obj.velocity.x, obj.velocity.y );
@@ -104,15 +110,19 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
                 try
                 {
                     objs.emplace_back( point_cloud, density, flags_created_item );
+                    point_cloud.clear();
                 }
                 catch(const std::exception& e)
                 {
                     error_popup = true;
                     error_message = e.what();
                 }
-                
-                creation_mode = false;
             }
+
+            ImGui::SameLine();
+            
+            if( ImGui::Button("Clear") )
+                point_cloud.clear();
         }
         ImGui::End();
     }
@@ -120,9 +130,8 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
     if( error_popup )
     {
         if( ImGui::Begin("Error", &error_popup) )
-        {
             ImGui::Text("Error: %s", error_message.c_str());
-        }
+        
         ImGui::End();
     }
 
@@ -137,7 +146,6 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
         }
         else if( ImGui::IsMouseClicked(ImGuiMouseButton_Left) )
         {
-
             bool object_found = false;
 
             for( size_t i = 0; i < objs.size(); i++ )

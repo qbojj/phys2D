@@ -1,3 +1,9 @@
+/*
+Jakub Janeczko
+header klasy GUI
+30.05.2023
+*/
+
 #pragma once
 
 #include "interfaces.h"

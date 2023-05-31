@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
-nagłówek połączenia GUI i silnika fizyki
-28.05.2023
+nagłówek pętli głównej programu
+30.05.2023
 */
 
 #pragma once

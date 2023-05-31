@@ -1,3 +1,9 @@
+/*
+Jakub Janeczko
+nagłówek Renderera
+30.05.2023
+*/
+
 #pragma once
 
 #include "interfaces.h"

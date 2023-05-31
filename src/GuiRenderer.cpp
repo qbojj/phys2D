@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
-implementacja GUI
-28.05.2023
+klasa łącząca GUI i Renderer
+30.05.2023
 */
 
 #include "GuiRenderer.h"

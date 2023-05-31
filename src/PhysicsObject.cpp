@@ -1,6 +1,6 @@
 /*
 Jakub Janeczko
-obiekt fizyki
+obiekt fizyki i odcinek
 28.05.2023
 */
 
@@ -20,10 +20,7 @@ static glm::dvec2 rot90( const glm::dvec2 &a )
     return glm::dvec2{ -a.y, a.x };
 }
 
-static double cross( const glm::dvec2 &a, const glm::dvec2 &b )
-{
-    return a.x*b.y - a.y*b.x;
-}
+const auto &cross = vec_cross;
 
 // > 0 if lines (a->b)-(b->c) wind counterclockwise
 // = 0 if colinear
@@ -96,7 +93,7 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
     // use area to compute mass
     // and centroid to get hull relative to the center
     center = centroid;
-    mass = area * density;
+    inv_mass = 1.0 / (area * density);
     
     points = std::move(hull);
 
@@ -118,16 +115,17 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
 
     momentArea /= 12.0;
 
-    moment_of_intertia = momentArea * density;
+    inv_moment_of_intertia = 1.0 / (momentArea * density);
+
+    if( flags & Immovable )
+    {
+        inv_mass = 0.0;
+        inv_moment_of_intertia = 0.0;
+    }
 }
 
 void PhysicsObject::add_impulse( glm::dvec2 point_of_application, glm::dvec2 value )
 {
-    if( flags & Immovable ) return;
-
-    const double inv_mass = 1.0 / mass;
-    const double inv_moment_of_intertia = 1.0 / moment_of_intertia;
-
     // separate force vector into two components:
     //     parallel and perpendicular
     //      to the line between center and point of application
@@ -135,33 +133,8 @@ void PhysicsObject::add_impulse( glm::dvec2 point_of_application, glm::dvec2 val
     // to avoid numerical problems of pont of application is very close (0,0)
     // assume it is (0,0) and only linear motion is applied
 
-    if( glm::length( point_of_application ) <= epsilon )
-    {
-        velocity += value * inv_mass;
-        return;
-    }
-
-    const glm::dvec2 norm_poa = glm::normalize( point_of_application );
-
-    // F = m * a ==> a = F / m  (for parallel component)
-    // Imp = F * dt
-    // dv = F * dt / m = Imp / m
-
-    const glm::dvec2 parallel = glm::dot( norm_poa, value ) * norm_poa;
-    velocity += parallel * inv_mass;
-
-    // M = I * dw/dt (M - moment of force)
-    // dw/dt = M / I
-    // M = F * r (for perpendicular component)
-    // M * dt = (F * dt) * r = Imp * r
-    // dw = M * dt / I
-
-    // rotate 90deg left
-    const glm::dvec2 poa_rot = rot90( point_of_application );
-
-    // M * dt
-    const double Mdt = glm::dot( poa_rot, value );
-    ang_velocity += Mdt * inv_moment_of_intertia;
+    velocity += value * inv_mass;
+    ang_velocity += vec_cross( point_of_application, value ) * inv_moment_of_intertia;
 }
 
 void PhysicsObject::time_step( double dt )
@@ -215,9 +188,7 @@ Edge PhysicsObject::get_closest_edge( const glm::dvec2 &point ) const
 
 double Edge::signed_distance( const glm::dvec2 &p ) const
 {
-    const glm::dvec2 pa = p - a,
-                     normal = glm::normalize( -rot90( b - a ) );
-    return glm::dot( pa, normal );
+    return glm::dot( p - a, get_normal() );
 }
 
 bool PhysicsObject::is_point_inside_object( const glm::dvec2 &p ) const
@@ -227,19 +198,7 @@ bool PhysicsObject::is_point_inside_object( const glm::dvec2 &p ) const
     return dist <= 0;
 }
 
-glm::dvec2 Edge::point_closest( const glm::dvec2 &p ) const
+glm::dvec2 Edge::get_normal() const
 {
-    glm::dvec2 dir = b - a;
-    glm::dvec2 rel_p = p - a;
-
-    double dir_len = glm::length( dir );
-    if( dir_len <= epsilon ) return a;
-
-    glm::dvec2 norm_dir = dir / dir_len;
-    double t = glm::dot( rel_p, norm_dir );
-
-    if( t < 0 ) t = 0;
-    if( t > 1 ) t = 1;
-
-    return a + dir * t;
+    return glm::normalize( -rot90( b - a ) );
 }

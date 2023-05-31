@@ -16,6 +16,12 @@ implementacja silnika fizyki
 #include <functional>
 #include <assert.h>
 
+// rotate 90 degrees left
+static glm::dvec2 rot90( const glm::dvec2 &v )
+{
+    return glm::dvec2( -v.y, v.x );
+}
+
 // get axis aligned bounding box of an object
 static std::pair<glm::dvec2, glm::dvec2> get_aabb( 
     const PhysicsObject &obj )
@@ -100,41 +106,57 @@ Simple_PhysicsEngine::get_shortest_edge_point_dist(
     return {edge, pt};
 }
 
-
+// using combination of projection and impulse method
+// https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/5collisionresponse/Physics%20-%20Collision%20Response.pdf
 void Simple_PhysicsEngine::deintersect_and_handle_collision(
-    PhysicsObject &a, Edge edge_a,
-    PhysicsObject &b, glm::dvec2 point_b )
+    PhysicsObject &a, PhysicsObject &b, 
+    const glm::dvec2 &point, const glm::dvec2 &normal,
+    double dist )
 {
-    double dist = edge_a.signed_distance( point_b );
-    assert( dist <= 0 ); // intersecting
+    //assert( dist >= 0 ); // intersecting
     assert( !(a.flags & PhysicsObject::Immovable) ||
             !(b.flags & PhysicsObject::Immovable ) );
     
-    glm::dvec2 edge_dir = glm::normalize( edge_a.b - edge_a.a );
-    glm::dvec2 edge_normal{ edge_dir.y, -edge_dir.x };
+    const glm::dvec2 deintersect_vec = dist * normal;
+    const double sum_inv_mass = a.inv_mass + b.inv_mass;
 
-    glm::dvec2 deintersect_vec = dist * edge_normal;
+    a.move_by(-deintersect_vec * (a.inv_mass / sum_inv_mass), 0 );
+    b.move_by( deintersect_vec * (b.inv_mass / sum_inv_mass), 0 );
 
-    glm::dvec2 closest_on_edge = edge_a.point_closest( point_b );
+    const glm::dvec2 rel_a = point - a.center;
+    const glm::dvec2 rel_b = point - b.center;
 
-    glm::dvec2 rel_a = closest_on_edge - a.center;
-    glm::dvec2 rel_b = point_b - b.center;
+    const glm::dvec2 ang_vel_a = a.ang_velocity * rot90( rel_a );
+    const glm::dvec2 ang_vel_b = b.ang_velocity * rot90( rel_b );
 
-    double mass_ratio; // a to (a+b)
+    const glm::dvec2 full_vel_a = a.velocity + ang_vel_a;
+    const glm::dvec2 full_vel_b = b.velocity + ang_vel_b;
 
-    if( a.flags & PhysicsObject::Immovable )
-        mass_ratio = 1;
-    else if( b.flags & PhysicsObject::Immovable )
-        mass_ratio = 0;
-    else
-        mass_ratio = a.mass / (a.mass + b.mass);
+    const glm::dvec2 contact_vel = full_vel_b - full_vel_a;
 
-    a.move_by( deintersect_vec * (1 - mass_ratio), 0 );
-    b.move_by(-deintersect_vec * mass_ratio, 0 );
+    double impulseForce = glm::dot( contact_vel, normal );
+
+    if( impulseForce < 0 ) // collision detected when object are deintersecting
+        return;
+
+    const double angular_force_a =
+        vec_cross(rel_a, normal) * a.inv_moment_of_intertia;
     
-    // energy calculations... ????
-    a.add_impulse( rel_a, deintersect_vec * 1e4 );
-    b.add_impulse( rel_b,-deintersect_vec * 1e4 );
+    const glm::dvec2 inertia_a = rot90( angular_force_a * rel_a );
+
+    const double angular_force_b =
+        vec_cross(rel_b, normal) * b.inv_moment_of_intertia;
+    
+    const glm::dvec2 inertia_b = rot90( angular_force_b * rel_b );
+
+    const double angular_effect = glm::dot( inertia_a + inertia_b, normal );
+
+    const glm::dvec2 impulse = 
+        ( -( 1.0 + restitution ) * impulseForce ) /
+        ( sum_inv_mass + angular_effect ) * normal;
+
+    a.add_impulse( rel_a,-impulse );
+    b.add_impulse( rel_b, impulse );
 }
 
 // handle collision if it occured
@@ -150,25 +172,53 @@ bool Simple_PhysicsEngine::handle_potential_collision(
     double d1 = e_a.signed_distance(p_b);
     double d2 = e_b.signed_distance(p_a);
 
+    // not intersecting
     if( d1 > 0 || d2 > 0 ) return false;
 
     if( d1 > d2 )
+    {
         deintersect_and_handle_collision(
-            a, e_a,
-            b, p_b );
+            a, b,
+            p_b, e_a.get_normal(),
+            -d1
+        );
+    }
     else
+    {
         deintersect_and_handle_collision(
-            b, e_b,
-            a, p_a );
+            a, b,
+            p_a, e_b.get_normal(),
+            d2
+        );
+    }
 
     return true;
 }
 
 void Simple_PhysicsEngine::onTick( std::vector<PhysicsObject> &objs, double dt )
 {
+    dt /= time_subdivision;
+
+    for( int i = 0; i < time_subdivision; i++ )
+        onTick_subdivided( objs, dt );
+}
+
+void Simple_PhysicsEngine::onTick_subdivided( std::vector<PhysicsObject> &objs, double dt )
+{
     // apply gravity
     for( PhysicsObject &obj : objs )
-        obj.add_impulse( {0, 0}, { 0.0, -gravity * dt * obj.mass } );
+        if( !( obj.flags & PhysicsObject::Immovable ) )
+            obj.add_impulse( {0, 0}, { 0.0, -gravity * dt / obj.inv_mass } );
+
+    // dampen speeds
+    const double dump_vel_factor = pow( 1. - dump_velocity_factor, dt );
+    const double dump_ang_vel_factor = pow( 1. - dump_angular_velocity_factor, dt );
+
+    for( PhysicsObject &obj : objs )
+    {
+        obj.velocity *= dump_vel_factor;
+        obj.ang_velocity *= dump_ang_vel_factor;
+    }
 
     // resolve moves from last time-step
     for( PhysicsObject &obj : objs )

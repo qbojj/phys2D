@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
-połączenie GUI i silnika fizyki
-28.05.2023
+pętla główna programu
+30.05.2023
 */
 
 #include "app.h"

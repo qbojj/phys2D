@@ -1,3 +1,9 @@
+/*
+Jakub Janeczko
+Renderer, czyli wyświetlanie sceny i gui
+30.05.2023
+*/
+
 #include "GL3_Renderer.h"
 
 #define GLFW_INCLUDE_NONE

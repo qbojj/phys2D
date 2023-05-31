@@ -1,6 +1,6 @@
 /*
 Jakub Janeczko
-nagłówek klasy implementującej GUI
+nagłówek klasy łączącej GUI i Renderer
 28.05.2023
 */
 

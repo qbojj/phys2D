@@ -1,6 +1,6 @@
 /*
 Jakub Janeczko
-nagłówek klasy implementującej interfejs silnika fizyki
+nagłówek silnika fizyki
 28.05.2023
 */
 
@@ -16,9 +16,16 @@ public:
     Simple_PhysicsEngine( double gravity ) : gravity(gravity) {}
     void onTick( std::vector<PhysicsObject> &objs, double dt ) override;
 
+    double gravity = 9.81;
+    double dump_velocity_factor = 0.05;
+    double dump_angular_velocity_factor = 0.05;
+    double restitution = 0.66;
+
+    int time_subdivision = 2;
+
 private:
-    double gravity;
-    
+    void onTick_subdivided( std::vector<PhysicsObject> &objs, double dt );
+
     bool is_potentially_colliding( const PhysicsObject &a, const PhysicsObject &b );
     bool handle_potential_collision( PhysicsObject &a, PhysicsObject &b );
 
@@ -28,6 +35,7 @@ private:
         const PhysicsObject &b );
     
     void deintersect_and_handle_collision(
-        PhysicsObject &a, Edge edge_a,
-        PhysicsObject &b, glm::dvec2 point_b );
+        PhysicsObject &a, PhysicsObject &b, 
+        const glm::dvec2 &point, const glm::dvec2 &normal,
+        double dist );
 };
