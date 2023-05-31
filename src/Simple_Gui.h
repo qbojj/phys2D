@@ -1,23 +1,39 @@
 /*
 Jakub Janeczko
 header klasy GUI
-30.05.2023
+31.05.2023
 */
 
 #pragma once
 
 #include "interfaces.h"
+#include "Simple_PhysicsEngine.h"
 
 #include <glm/glm.hpp>
 
 #include <vector>
 #include <string>
 
+/**
+ * @brief GUI z możliwością manipulacji Simple_PhysicsEngine
+ * 
+ * posiada możliwość:
+ * - dodawania i usuwania obiektów
+ * - zmiany parametrów Simple_PhysicsEngine
+ * - ciągnięcia obiektów
+ * - zobaczenia wewnętrznych parametrów obiektów
+ * - wypisuje jak długo zajmuje przejście do kolejnego stanu
+ */
 class Simple_Gui : public IGui {
 public:
-    Simple_Gui();
+    /**
+     * @brief tworzy GUI operujące na podanym silniku
+     * 
+     * @param engine silnik fizyki do modyfikacji parametrów
+     */
+    Simple_Gui( Simple_PhysicsEngine *engine );
 
-    renderer_info handle_gui( std::vector<PhysicsObject> &objs, double dt ) override;
+    virtual renderer_info handle_gui( std::vector<PhysicsObject> &objs, double dt );
 
 private:
     glm::dvec2 camPos;
@@ -41,4 +57,6 @@ private:
     std::string error_message;
 
     bool pulling_scene;
+
+    Simple_PhysicsEngine *engine;
 };

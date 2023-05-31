@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 klasa GUI
-30.05.2023
+31.05.2023
 */
 
 #include "Simple_Gui.h"
@@ -10,12 +10,29 @@ klasa GUI
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
 
+#include <stdexcept>
+
 const glm::u8vec4 white( 255, 255, 255, 255 ),
                   red( 255, 0, 0, 255 );
 
-Simple_Gui::Simple_Gui()
+Simple_Gui::Simple_Gui( Simple_PhysicsEngine *engine )
+    : engine(engine)
 {
+    if( !engine ) throw std::invalid_argument("engine must be present for Simple_Gui");
+
+    camPos = glm::dvec2( 0.0 );
     camZoom = 10.;
+
+    bTriangles = false;
+    object_selected = false;
+    creation_mode = false;
+    error_popup = false;
+    pulling_scene = false;
+}
+
+static void imgui_double_slider( const char *label, double &val, double min, double max )
+{
+    ImGui::SliderScalar(label, ImGuiDataType_Double, &val, &min, &max );
 }
 
 renderer_info
@@ -51,6 +68,21 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
             flags_created_item = 0;
         }
 
+    }
+    ImGui::End();
+
+    if( ImGui::Begin( "Physics engine parameters") )
+    {
+        imgui_double_slider("gravity [m/s2]", engine->gravity, 0, 100 );
+        imgui_double_slider("velocity dump factor", 
+            engine->dump_velocity_factor, 0, 0.1);
+        imgui_double_slider("angular velocity dump factor",
+            engine->dump_angular_velocity_factor, 0, 0.1 );
+        imgui_double_slider("restitution factor (how much energy is preserved during collision)",
+            engine->restitution, 0, 1 );
+        
+        ImGui::SliderInt("physics calculation subdivisions",
+            &engine->time_subdivision, 1, 1024 );
     }
     ImGui::End();
 
@@ -101,7 +133,7 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
         if( ImGui::Begin("create PhysicalObject", &creation_mode) )
         {
-            ImGui::InputDouble("density", &density);
+            imgui_double_slider("density", density, 0.01, 10);
             ImGui::CheckboxFlags("Immovable", 
                 &flags_created_item, PhysicsObject::Immovable );
             

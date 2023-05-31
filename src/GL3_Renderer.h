@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 nagłówek Renderera
-30.05.2023
+31.05.2023
 */
 
 #pragma once
@@ -10,13 +10,18 @@ nagłówek Renderera
 
 typedef struct GLFWwindow GLFWwindow;
 
+/**
+ * @brief renderer korzystający z openGl 3 oraz GLFW
+ * 
+ * posiada możliwość wyświetlania obwodów lub wypełnionych obiektów
+ */
 class GL3_Renderer : public IRenderer {
 public:
     GL3_Renderer();
     ~GL3_Renderer();
 
-    bool draw( const renderer_info &ri,
-        const std::vector<PhysicsObject> &objs, double dt ) override;
+    virtual bool draw( const renderer_info &ri,
+        const std::vector<PhysicsObject> &objs, double dt );
 
 private:
     GLFWwindow *window;

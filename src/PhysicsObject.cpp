@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 obiekt fizyki i odcinek
-28.05.2023
+31.05.2023
 */
 
 #include "PhysicsObject.h"

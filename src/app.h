@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 nagłówek pętli głównej programu
-30.05.2023
+31.05.2023
 */
 
 #pragma once
@@ -9,16 +9,23 @@ nagłówek pętli głównej programu
 #include "interfaces.h"
 #include "GuiRenderer.h"
 
-#include <memory>
-
+/**
+ * @brief Klasa aplikacji
+ * 
+ * implementuje pętlę główną programu oraz
+ * łączy GUI i silnik fizyki
+ */
 class App {
 public:
-    GuiRenderer gui;
-    std::unique_ptr<IPhysicsEngine> engine;
+    GuiRenderer gui; ///< gui aplikacji
+    IPhysicsEngine *engine; ///< silnik fizyki
 
-    App( GuiRenderer gui, std::unique_ptr<IPhysicsEngine> engine )
+    App( GuiRenderer gui, IPhysicsEngine *engine )
         : gui(std::move(gui))
-        , engine(std::move(engine)) {}
+        , engine(engine) {}
     
+    /**
+     * @brief pętla główna programu
+     */
     void run();
 };

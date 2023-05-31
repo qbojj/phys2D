@@ -1,5 +1,7 @@
 build/
 .vscode/
-doc/
+doc/html/
+doc/man/
+doc/latex/
 
 imgui.ini

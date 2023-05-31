@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 implementacja silnika fizyki
-28.05.2023
+31.05.2023
 */
 
 #include "Simple_PhysicsEngine.h"

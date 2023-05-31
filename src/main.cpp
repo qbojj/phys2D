@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 main...
-28.05.2023
+31.05.2023
 */
 
 #include "app.h"
@@ -23,11 +23,14 @@ int main()
     }
 
     {
+        auto engine = std::make_unique<Simple_PhysicsEngine>();
+        auto renderer = std::make_unique<GL3_Renderer>();
+        
+        auto gui = std::make_unique<Simple_Gui>( engine.get() );
+
         App app(
-            GuiRenderer{
-                std::make_unique<Simple_Gui>(), 
-                std::make_unique<GL3_Renderer>() },
-            std::make_unique<Simple_PhysicsEngine>( 9.81 ) );
+            GuiRenderer{ gui.get(), renderer.get() },
+            engine.get() );
         
         app.run();
     }

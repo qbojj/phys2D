@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 nagłówek klasy łączącej GUI i Renderer
-28.05.2023
+31.05.2023
 */
 
 #pragma once
@@ -15,14 +15,25 @@ nagłówek klasy łączącej GUI i Renderer
 #include <stdint.h>
 #include <memory>
 
+/**
+ * @brief klasa łącząca renderer i GUI
+ */
 class GuiRenderer {
 public:
-    GuiRenderer( std::unique_ptr<IGui> gui, std::unique_ptr<IRenderer> renderer )
-        : gui(std::move(gui)), renderer(std::move(renderer)) {}
+    GuiRenderer( IGui *gui, IRenderer *renderer )
+        : gui(gui), renderer(renderer) {}
     
+    /**
+     * @brief obsługuje interakcje z użytkownikiem i rysuje GUI wraz z obiektami
+     * 
+     * @param objs obiekty w symulacji
+     * @param dt różnica czasu od poprzedniego kroku symulacji
+     * @return true program powinien kontynuować działanie
+     * @return false program powinien się zakończyć
+     */
     bool onDraw( std::vector<PhysicsObject> &objs, double dt );
 
 private:
-    std::unique_ptr<IGui> gui;
-    std::unique_ptr<IRenderer> renderer;
+    IGui *gui;
+    IRenderer *renderer;
 };
