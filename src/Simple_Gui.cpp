@@ -10,6 +10,8 @@ klasa GUI
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <stdexcept>
 
 const glm::u8vec4 white( 255, 255, 255, 255 ),
@@ -124,7 +126,7 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
             }
             ri.additional_lines.push_back( new_obj.points[0] + new_obj.center );
         }
-        catch(const std::exception& e)
+        catch(const std::exception&)
         {
             if( point_cloud.size() == 2 )
             {
@@ -266,9 +268,9 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
             // add an arrow representing pulling force
 
-            const float a1 = (float)pullArrowLen * 0.03,
-                        h1 = (float)pullArrowLen * 0.8,
-                        a2 = (float)pullArrowLen * 0.2;
+            const float a1 = (float)pullArrowLen * 0.03f,
+                        h1 = (float)pullArrowLen * 0.8f,
+                        a2 = (float)pullArrowLen * 0.2f;
             
             const glm::vec2 arrow[]{
                 {a1, 0},
@@ -288,7 +290,7 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
                     glm::translate(
                         glm::mat4( 1.f ),
                         arrow_start ),
-                    atan2f( pullArrowDir.y, pullArrowDir.x ) - M_PI_2f,
+                    atan2f( (float)pullArrowDir.y, (float)pullArrowDir.x ) - (float)M_PI_2,
                     glm::vec3( 0.f, 0.f, 1.f )
                 );
 

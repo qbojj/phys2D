@@ -260,7 +260,7 @@ bool GL3_Renderer::draw( const renderer_info &ri,
     ) * glm::translate(
             glm::scale(
                 glm::mat4( 1.f ), 
-                glm::vec3( ri.camZoom ) ),
+                glm::vec3( (float)ri.camZoom ) ),
             glm::vec3( -glm::vec2( ri.camPos ), 0.f ) );
 
     glUniformMatrix4fv( mViewLocation, 1, GL_FALSE, glm::value_ptr( global_view ) );
@@ -282,8 +282,8 @@ bool GL3_Renderer::draw( const renderer_info &ri,
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 
-    ssize_t verts_size = verts.size() * sizeof(verts[0]);
-    ssize_t indices_size = indices.size() * sizeof(indices[0]);
+    size_t verts_size = verts.size() * sizeof(verts[0]);
+    size_t indices_size = indices.size() * sizeof(indices[0]);
 
     glBufferData(GL_ARRAY_BUFFER, verts_size + indices_size, NULL, GL_STREAM_DRAW);
     
@@ -294,17 +294,17 @@ bool GL3_Renderer::draw( const renderer_info &ri,
     glPrimitiveRestartIndex( INT32_MAX );
 
     glDrawElements(ri.fill_objects ? GL_TRIANGLE_STRIP : GL_LINE_STRIP, 
-        indices_size, GL_UNSIGNED_INT, (void *)verts_size );
+        (GLsizei)indices_size, GL_UNSIGNED_INT, (void *)verts_size );
     
     glPointSize(3);
     size_t vert_offset = object_vert_count;
-    glDrawArrays(GL_POINTS, vert_offset, ri.additional_points.size());
+    glDrawArrays(GL_POINTS, (GLint)vert_offset, (GLsizei)ri.additional_points.size());
     
     vert_offset += ri.additional_points.size();
-    glDrawArrays(GL_LINES, vert_offset, ri.additional_lines.size() );
+    glDrawArrays(GL_LINES, (GLint)vert_offset, (GLsizei)ri.additional_lines.size() );
 
     vert_offset += ri.additional_lines.size();
-    glDrawArrays(GL_TRIANGLES, vert_offset, ri.additional_triangles.size());
+    glDrawArrays(GL_TRIANGLES, (GLint)vert_offset, (GLsizei)ri.additional_triangles.size());
 
     ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
     glfwSwapBuffers( window );

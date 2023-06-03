@@ -1,7 +1,7 @@
 # Jakub Janeczko
 # konfiguracja kompilacji projektu
-# 28.05.2023
-#
+# 03.06.2023
+
 # wymagany jest kompilator C++ (MSVC / GCC / CLANG) oraz cmake >= 3.20
 # by zkompilować projekt:
 #
@@ -12,6 +12,10 @@
 
 cmake_minimum_required(VERSION 3.20)
 project( phys2D C CXX )
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set( GLFW_BUILD_DOCS OFF )
 set( GLFW_INSTALL OFF )
@@ -42,7 +46,7 @@ file(GLOB phys2D_SRC CONFIGURE_DEPENDS
 
 add_executable( phys2D ${phys2D_SRC} )
 target_compile_options( phys2D PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<CXX_COMPILER_ID:MSVC>:/W4 /utf-8>
   $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
 )
 target_include_directories( phys2D PRIVATE
