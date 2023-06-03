@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 klasa GUI
-31.05.2023
+3.06.2023
 */
 
 #include "Simple_Gui.h"
@@ -18,7 +18,8 @@ const glm::u8vec4 white( 255, 255, 255, 255 ),
 Simple_Gui::Simple_Gui( Simple_PhysicsEngine *engine )
     : engine(engine)
 {
-    if( !engine ) throw std::invalid_argument("engine must be present for Simple_Gui");
+    if( !engine ) 
+        throw std::invalid_argument(u8"Simple_Gui musi otrzymać Simple_PhysicsEngine");
 
     camPos = glm::dvec2( 0.0 );
     camZoom = 10.;
@@ -52,54 +53,55 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
     ImGui::ShowMetricsWindow();
 
-    if( ImGui::Begin("main stat window") )
+    if( ImGui::Begin(u8"Główne okno") )
     {
-        ImGui::Text("Camera position: %g %g", camPos.x, camPos.y );
-        ImGui::Text("Camera zoom (pixels per meter): %g", camZoom );
-        ImGui::Checkbox("fill objects", &bTriangles );
+        ImGui::Text(u8"Pozycja kamery: x=%g, y=%g", camPos.x, camPos.y );
+        ImGui::Text(u8"Przybliżenie: %g px/m", camZoom );
+        ImGui::Checkbox(u8"Wypełniać obiekty?", &bTriangles );
 
         bool last_creation_mode = creation_mode;
-        ImGui::Checkbox("create object", &creation_mode );
+        ImGui::Checkbox(u8"Menu tworzenia obiektów", &creation_mode );
         if( !last_creation_mode && creation_mode )
         {
-            // start creation mode
             density = 1.0;
             point_cloud.clear();
             flags_created_item = 0;
         }
-
     }
     ImGui::End();
 
-    if( ImGui::Begin( "Physics engine parameters") )
+    if( ImGui::Begin( u8"Paramety silnika fizyki") )
     {
-        imgui_double_slider("gravity [m/s2]", engine->gravity, 0, 100 );
-        imgui_double_slider("velocity dump factor", 
+        imgui_double_slider(u8"Siła grawitacji [m/s2]", engine->gravity, 0, 100 );
+        imgui_double_slider(u8"Składowa pomniejszania prędkości", 
             engine->dump_velocity_factor, 0, 0.1);
-        imgui_double_slider("angular velocity dump factor",
+        imgui_double_slider(u8"Składowa pomniejszania prędkości kątowej",
             engine->dump_angular_velocity_factor, 0, 0.1 );
-        imgui_double_slider("restitution factor (how much energy is preserved during collision)",
+        imgui_double_slider(u8"Spręrzystość odbicia (ile energi zostaje przy odbiciu)",
             engine->restitution, 0, 1 );
         
-        ImGui::SliderInt("physics calculation subdivisions",
+        ImGui::SliderInt(u8"Liczba podkroków symulacji",
             &engine->time_subdivision, 1, 1024 );
     }
     ImGui::End();
 
     if( object_selected )
     {
-        if( ImGui::Begin("PhysicalObject info", &object_selected) )
+        if( ImGui::Begin(u8"Parametry symulowanego obiektu", &object_selected) )
         {
             PhysicsObject &obj = objs[object_idx];
 
-            ImGui::Value("index", object_idx);
-            ImGui::Value("inv mass", (float)obj.inv_mass);
-            ImGui::Value("inv moment of inertia", (float)obj.inv_moment_of_intertia);
-            ImGui::Text("center: %g, %g", obj.center.x, obj.center.y );
-            ImGui::Text("angle: %g", obj.angle);
-            ImGui::Text("velocity: %g, %g", obj.velocity.x, obj.velocity.y );
-            ImGui::Text("angular velocity: %g", obj.ang_velocity );
-            ImGui::Text("flags: 0x%x", obj.flags);
+            ImGui::Value("Index", object_idx);
+            ImGui::Value(u8"Odwrotność masy [1/kg]", (float)obj.inv_mass);
+            ImGui::Value(u8"Odwrotność momentu bezwładności [1/(kg*m2)]", 
+                (float)obj.inv_moment_of_intertia);
+
+            ImGui::Text(u8"Środek [m]: x=%g, y=%g", obj.center.x, obj.center.y );
+            ImGui::Text(u8"Kąt [rad]: %g", obj.angle);
+            ImGui::Text(u8"Prędkość [m/s]: x=%g, y=%g", obj.velocity.x, obj.velocity.y );
+            ImGui::Text(u8"Prędkość kątowa [rad/s]: %g", obj.ang_velocity );
+            ImGui::Text(u8"Flagi: %s", 
+                obj.flags & PhysicsObject::Immovable ? u8"nieruszalny" : u8"");
         }
         ImGui::End();
     }
@@ -131,13 +133,13 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
             }
         }
 
-        if( ImGui::Begin("create PhysicalObject", &creation_mode) )
+        if( ImGui::Begin(u8"Menu tworzenia", &creation_mode) )
         {
-            imgui_double_slider("density", density, 0.01, 10);
-            ImGui::CheckboxFlags("Immovable", 
+            imgui_double_slider(u8"Gęstość", density, 0.01, 10);
+            ImGui::CheckboxFlags(u8"Nieruszalny?", 
                 &flags_created_item, PhysicsObject::Immovable );
             
-            if( ImGui::Button("Create") )
+            if( ImGui::Button(u8"Utwórz") )
             {
                 try
                 {
@@ -153,7 +155,7 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
             ImGui::SameLine();
             
-            if( ImGui::Button("Clear") )
+            if( ImGui::Button(u8"Wyczyść punktu") )
                 point_cloud.clear();
         }
         ImGui::End();
@@ -161,8 +163,8 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
     if( error_popup )
     {
-        if( ImGui::Begin("Error", &error_popup) )
-            ImGui::Text("Error: %s", error_message.c_str());
+        if( ImGui::Begin(u8"Błąd", &error_popup) )
+            ImGui::Text(u8"Błąd: %s", error_message.c_str());
         
         ImGui::End();
     }

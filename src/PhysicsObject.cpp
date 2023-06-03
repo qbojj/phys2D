@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 obiekt fizyki i odcinek
-31.05.2023
+3.06.2023
 */
 
 #include "PhysicsObject.h"
@@ -14,7 +14,7 @@ obiekt fizyki i odcinek
 
 constexpr double epsilon = 1e-13;
 
-// rotate 90 degrees left
+// obrót o 90 stopni w lewo
 static glm::dvec2 rot90( const glm::dvec2 &a )
 {
     return glm::dvec2{ -a.y, a.x };
@@ -22,9 +22,9 @@ static glm::dvec2 rot90( const glm::dvec2 &a )
 
 const auto &cross = vec_cross;
 
-// > 0 if lines (a->b)-(b->c) wind counterclockwise
-// = 0 if colinear
-// < 0 otherwise
+// > 0 jeśli (a->b)-(b->c) przechodzi odwrotnie do ruchu wskazówek zegara
+// = 0 jeżeli a,b,c wspóliniowe
+// < 0 w p.p.
 static double ccw( const glm::dvec2 &a, const glm::dvec2 &b, const glm::dvec2 &c )
 {
     const glm::dvec2 ab = b - a, cb = c - b;
@@ -35,15 +35,15 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
     : flags(flags)
 {
     if( point_cloud.size() < 3 )
-        throw std::invalid_argument( "Physics object must have at least 3 points" );
+        throw std::invalid_argument( u8"Obiekt fizyki musi mieć przynajmniej 3 punkty" );
     
-    // compute convex hull using grahm's scan: https://en.wikipedia.org/wiki/Graham_scan
+    // oblicz otoczkę wypukłą przez algorytm Grahma: https://en.wikipedia.org/wiki/Graham_scan
     std::vector<glm::dvec2> hull;
     
     const glm::dvec2 p0 = *std::min_element( point_cloud.begin(), point_cloud.end(),
         []( const glm::dvec2 &a, const glm::dvec2 &b ) { return a.y < b.y; } );
 
-    // sort by angle with p0 and break ties with length
+    // posotrój po kącie z p0 z rozstrzygnięciem remisów po długości
     std::sort( point_cloud.begin(), point_cloud.end(),
         [&p0]( const glm::dvec2 &a, const glm::dvec2 &b )
         {
@@ -59,7 +59,7 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
     
     for( const glm::dvec2 &point : point_cloud )
     {
-        // ensure there are no indents in the hull
+        // zapewnij że punkty w otoczce tworzą wypukły obiekt
         while( hull.size() >= 2 &&
                 ccw( hull[hull.size()-2], hull[hull.size()-1], point) <= epsilon )
                 hull.pop_back();
@@ -67,11 +67,13 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
         hull.push_back(point);
     }
 
-    if( hull.size() < 3 )
-        throw std::runtime_error( "points on physiccs object must not be colinear" );
+    // otoczka wypukła została znaleziona
 
-    // our hull is complete now find centroid
-    // to calculate centroid using https://en.wikipedia.org/wiki/Centroid
+    if( hull.size() < 3 )
+        throw std::runtime_error( u8"Otoczka obiektu fizyki "
+            u8"musi mieć przynajmniej 3 punkty" );
+
+    // znajdź środek tak jak zostało napisane w https://en.wikipedia.org/wiki/Centroid
 
     double area = 0.0;
     glm::dvec2 centroid{};
@@ -90,19 +92,19 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
     area /= 2;
     centroid /= 6. * area;
 
-    // use area to compute mass
-    // and centroid to get hull relative to the center
+    // oblicz masę
     center = centroid;
     inv_mass = 1.0 / (area * density);
     
     points = std::move(hull);
 
+    // zapisz punkty względem środka
     for( glm::dvec2 &point : points )
         point -= center;
 
-    // now compute moment of intertia
-    // total moment of inertia is moment of intertia of all triangles
-    // using https://physics.stackexchange.com/questions/708936/how-to-calculate-the-moment-of-inertia-of-convex-polygon-two-dimensions
+    // oblicz moment bezwładności obiektu
+    // całkowity moment jest sumą momentów wszystkich trójkątów
+    // https://physics.stackexchange.com/questions/708936/how-to-calculate-the-moment-of-inertia-of-convex-polygon-two-dimensions
     double momentArea = 0.0;
     
     for( size_t i = 0; i < points.size(); i++ )
@@ -119,6 +121,7 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
 
     if( flags & Immovable )
     {
+        // jeśli obiekt jest nieruszalny to ustaw masę i moment bezwładności na nieskończoność
         inv_mass = 0.0;
         inv_moment_of_intertia = 0.0;
     }
@@ -126,13 +129,6 @@ PhysicsObject::PhysicsObject(std::vector<glm::dvec2> point_cloud, double density
 
 void PhysicsObject::add_impulse( glm::dvec2 point_of_application, glm::dvec2 value )
 {
-    // separate force vector into two components:
-    //     parallel and perpendicular
-    //      to the line between center and point of application
-
-    // to avoid numerical problems of pont of application is very close (0,0)
-    // assume it is (0,0) and only linear motion is applied
-
     velocity += value * inv_mass;
     ang_velocity += vec_cross( point_of_application, value ) * inv_moment_of_intertia;
 }
@@ -154,7 +150,7 @@ void PhysicsObject::move_by( glm::dvec2 vec, double d_angle )
     center += vec;
     angle += d_angle;
 
-    // apply rotation
+    // obróć punkty by odzwierciedlały prawdziwą pozycję
     double c_a = cos( d_angle ),
            s_a = sin( d_angle );
 
@@ -173,6 +169,7 @@ Edge PhysicsObject::get_closest_edge( const glm::dvec2 &point ) const
 
     for( size_t i = 0; i < points.size() - 1; i++ )
     {
+        // punkt pomiędzy dwoma wierzchołkami
         if( cross( points[i], pt ) >= 0 &&
             cross( pt, points[i+1] ) >= 0 )
             return { center + points[i], center + points[i+1] };

@@ -51,3 +51,8 @@ target_include_directories( phys2D PRIVATE
 target_link_libraries( phys2D PRIVATE
   imgui glm::glm glfw glad
 )
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/times.ttf
+  ${CMAKE_CURRENT_BINARY_DIR}/times.ttf
+  COPYONLY )

@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 implementacja silnika fizyki
-31.05.2023
+3.06.2023
 */
 
 #include "Simple_PhysicsEngine.h"
@@ -16,13 +16,13 @@ implementacja silnika fizyki
 #include <functional>
 #include <assert.h>
 
-// rotate 90 degrees left
+// obrót o 90 stopni w lewo
 static glm::dvec2 rot90( const glm::dvec2 &v )
 {
     return glm::dvec2( -v.y, v.x );
 }
 
-// get axis aligned bounding box of an object
+// znajdź AABB (axis aligned bounding box) obiektu
 static std::pair<glm::dvec2, glm::dvec2> get_aabb( 
     const PhysicsObject &obj )
 {
@@ -54,18 +54,21 @@ bool Simple_PhysicsEngine::is_potentially_colliding(
     auto [a_min, a_max] = get_aabb(a);
     auto [b_min, b_max] = get_aabb(b);
 
-    // two immovable object should not collide
+    // dwa nieruszalne obiekty nie powinny kolidować
     if( (a.flags & PhysicsObject::Immovable) &&
         (b.flags & PhysicsObject::Immovable) )
         return false;
 
-    // are AABBs intersecting?
+    // czy AABB kolidują
     return glm::all(
             glm::lessThanEqual( a_min, b_max ) &&
             glm::lessThanEqual( b_min, a_max )
         );
 }
 
+// znajdź parę krawęź a - punkt b które są najbliżej
+// czyli najkrótszą drogę by rozdzielić obiekt a od b
+// po krawędzi a 
 std::pair<Edge,glm::dvec2>
 Simple_PhysicsEngine::get_shortest_edge_point_dist( 
     const PhysicsObject &a,
@@ -106,14 +109,13 @@ Simple_PhysicsEngine::get_shortest_edge_point_dist(
     return {edge, pt};
 }
 
-// using combination of projection and impulse method
+// kombinacja metod rzutowania i impulsów
 // https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/5collisionresponse/Physics%20-%20Collision%20Response.pdf
 void Simple_PhysicsEngine::deintersect_and_handle_collision(
     PhysicsObject &a, PhysicsObject &b, 
     const glm::dvec2 &point, const glm::dvec2 &normal,
     double dist )
 {
-    //assert( dist >= 0 ); // intersecting
     assert( !(a.flags & PhysicsObject::Immovable) ||
             !(b.flags & PhysicsObject::Immovable ) );
     
@@ -136,7 +138,7 @@ void Simple_PhysicsEngine::deintersect_and_handle_collision(
 
     double impulseForce = glm::dot( contact_vel, normal );
 
-    if( impulseForce < 0 ) // collision detected when object are deintersecting
+    if( impulseForce < 0 ) // obiekty rozdzielają się samoczynnie
         return;
 
     const double angular_force_a =
@@ -159,21 +161,20 @@ void Simple_PhysicsEngine::deintersect_and_handle_collision(
     b.add_impulse( rel_b, impulse );
 }
 
-// handle collision if it occured
-// and return true if it did so
-bool Simple_PhysicsEngine::handle_potential_collision( 
+// rozwiąż kolizję jeżeli taka zaszła
+void Simple_PhysicsEngine::handle_potential_collision( 
     PhysicsObject &a, 
     PhysicsObject &b )
 {
-    // find shortest de-intersect vector
+    // znajdź najkrótrzy wektor rozdzielający obiekty
     auto [e_a, p_b] = get_shortest_edge_point_dist(a, b);
     auto [e_b, p_a] = get_shortest_edge_point_dist(b, a);
     
     double d1 = e_a.signed_distance(p_b);
     double d2 = e_b.signed_distance(p_a);
 
-    // not intersecting
-    if( d1 > 0 || d2 > 0 ) return false;
+    // obiekty nie nachodzą na siebie
+    if( d1 > 0 || d2 > 0 ) return;
 
     if( d1 > d2 )
     {
@@ -191,8 +192,6 @@ bool Simple_PhysicsEngine::handle_potential_collision(
             d2
         );
     }
-
-    return true;
 }
 
 void Simple_PhysicsEngine::onTick( std::vector<PhysicsObject> &objs, double dt )
@@ -205,12 +204,12 @@ void Simple_PhysicsEngine::onTick( std::vector<PhysicsObject> &objs, double dt )
 
 void Simple_PhysicsEngine::onTick_subdivided( std::vector<PhysicsObject> &objs, double dt )
 {
-    // apply gravity
+    // dodaj siłę grawitacji
     for( PhysicsObject &obj : objs )
         if( !( obj.flags & PhysicsObject::Immovable ) )
             obj.add_impulse( {0, 0}, { 0.0, -gravity * dt / obj.inv_mass } );
 
-    // dampen speeds
+    // zmniejsz prędkości obiektów
     const double dump_vel_factor = pow( 1. - dump_velocity_factor, dt );
     const double dump_ang_vel_factor = pow( 1. - dump_angular_velocity_factor, dt );
 
@@ -220,10 +219,11 @@ void Simple_PhysicsEngine::onTick_subdivided( std::vector<PhysicsObject> &objs, 
         obj.ang_velocity *= dump_ang_vel_factor;
     }
 
-    // resolve moves from last time-step
+    // przemieść obiekty zgodnie z ich prędkościami
     for( PhysicsObject &obj : objs )
         obj.time_step( dt );
 
+    // znajdź kolizje i je rozwiąrz
     for( PhysicsObject &obj : objs )
         for( PhysicsObject &obj2 : objs )
             if( &obj != &obj2 && is_potentially_colliding( obj, obj2 ) )

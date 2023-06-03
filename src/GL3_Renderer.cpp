@@ -65,7 +65,7 @@ static void APIENTRY deb_callback(
 
 GL3_Renderer::GL3_Renderer()
 {
-    if( !glfwInit() ) throw std::runtime_error("glfw could not be initialized");
+    if( !glfwInit() ) throw std::runtime_error(u8"glfw nie mogło się zainicjalizować");
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -73,14 +73,14 @@ GL3_Renderer::GL3_Renderer()
 
     glfwWindowHint(GLFW_SAMPLES, 16);
 
-    window = glfwCreateWindow( 1024, 768, "phys2D", nullptr, nullptr );
+    window = glfwCreateWindow( 1024, 768, u8"phys2D", nullptr, nullptr );
     if( !window )
     {
         glfwTerminate();
 
         const char *msg;
         glfwGetError( &msg );
-        throw std::runtime_error("could not create window " + std::string(msg));
+        throw std::runtime_error(u8"nie można otworzyć okna: " + std::string(msg));
     }
 
     glfwMakeContextCurrent( window );
@@ -93,6 +93,18 @@ GL3_Renderer::GL3_Renderer()
         glEnable( GL_DEBUG_OUTPUT );
         glDebugMessageCallback( deb_callback, nullptr );
     }
+
+    ImGuiIO &io = ImGui::GetIO();
+
+    ImFontGlyphRangesBuilder builder;
+    builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
+    builder.AddText(u8"ąĄęĘżŻźŹłŁćĆóÓśŚńŃ");
+
+    ImVector<ImWchar> ranges;
+    builder.BuildRanges( &ranges );
+
+    io.Fonts->AddFontFromFileTTF("times.ttf", 14, nullptr, ranges.Data );
+    io.Fonts->Build();
 
     ImGui_ImplGlfw_InitForOpenGL( window, true );
     ImGui_ImplOpenGL3_Init();
@@ -179,7 +191,8 @@ std::vector<uint32_t> GL3_Renderer::renderTriangles( const std::vector<PhysicsOb
     for( const PhysicsObject &obj : objs )
     {
         uint32_t point_cnt = (uint32_t)obj.points.size();
-        // create triangle strip from the list
+        
+        // utwórz 'triangle strip' z listy punktów
         uint32_t front_it = offset + 1, 
                  back_it = offset + point_cnt - 1;
 
@@ -209,7 +222,7 @@ std::vector<uint32_t> GL3_Renderer::renderLines( const std::vector<PhysicsObject
 
     for( const PhysicsObject &obj : objs )
     {
-        // create triangle strip from the list
+        // utwórz 'line strip' z listy punktów
         for( uint32_t i = 0; i < obj.points.size(); i++ )
             indices.push_back( i + offset );
 
@@ -283,6 +296,7 @@ bool GL3_Renderer::draw( const renderer_info &ri,
     glDrawElements(ri.fill_objects ? GL_TRIANGLE_STRIP : GL_LINE_STRIP, 
         indices_size, GL_UNSIGNED_INT, (void *)verts_size );
     
+    glPointSize(3);
     size_t vert_offset = object_vert_count;
     glDrawArrays(GL_POINTS, vert_offset, ri.additional_points.size());
     
