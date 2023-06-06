@@ -4,6 +4,13 @@ czyli prosty silnik fizyki 2D z wizualizacją
 
 ## kompilacja
 
+by otrzymać źródła:
+
+```sh
+git clone https://github.com/qbojj/phys2D.git --recurse-submodules
+cd phys2D
+```
+
 ### Ubuntu
 
 ```sh
@@ -17,6 +24,7 @@ cmake --build .
 ### Windows
 
 potrzeba zainstalować CMake oraz Visual Studio lub MinGW
+
 ```bat
 mkdir build
 cd build
@@ -38,5 +46,5 @@ Wykorzystane zostały materiały:
 - Akcelaracja sprzętowa grafiki: [OpenGL](https://www.opengl.org/)
 - Algebra liniowa: [glm](https://github.com/g-truc/glm)
 - gui: 
-  - [glfw](https://github.com/glfw/glfw)
-  - [imgui](https://github.com/ocornut/imgui)
+  - Otwieranie okna i kontekstu OpenGL: [glfw](https://github.com/glfw/glfw)
+  - Gui aplikacji: [imgui](https://github.com/ocornut/imgui)
