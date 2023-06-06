@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 nagłówek silnika fizyki
-3.06.2023
+6.06.2023
 */
 
 #pragma once
@@ -27,6 +27,7 @@ public:
     double dump_angular_velocity_factor = 0.05;
     
     double restitution = 0.66; ///< ile energii zostaje po kolizji dwóch obiektów
+    double friction_coeff = 1.; ///< współczynnik tarcia
 
     /**
      * @brief na ile części zostaje podzielona

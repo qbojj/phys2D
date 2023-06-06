@@ -81,6 +81,8 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
             engine->dump_angular_velocity_factor, 0, 0.1 );
         imgui_double_slider(u8"Spręrzystość odbicia (ile energi zostaje przy odbiciu)",
             engine->restitution, 0, 1 );
+        imgui_double_slider(u8"Współczynnik tarcia",
+            engine->friction_coeff, 0, 4 );
         
         ImGui::SliderInt(u8"Liczba podkroków symulacji",
             &engine->time_subdivision, 1, 1024 );

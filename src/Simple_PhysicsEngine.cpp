@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 implementacja silnika fizyki
-3.06.2023
+6.06.2023
 */
 
 #include "Simple_PhysicsEngine.h"
@@ -153,12 +153,40 @@ void Simple_PhysicsEngine::deintersect_and_handle_collision(
 
     const double angular_effect = glm::dot( inertia_a + inertia_b, normal );
 
-    const glm::dvec2 impulse = 
+    const double impulse_length = 
         ( -( 1.0 + restitution ) * impulseForce ) /
-        ( sum_inv_mass + angular_effect ) * normal;
+            ( sum_inv_mass + angular_effect );
+
+    const glm::dvec2 impulse = impulse_length * normal;
 
     a.add_impulse( rel_a,-impulse );
     b.add_impulse( rel_b, impulse );
+
+    // dodaj tarcie
+    const double max_friction_imp = abs(impulse_length) * friction_coeff;
+
+    const double rel_perp_vel = glm::dot( contact_vel, rot90( normal ) );
+
+    const glm::dvec2 friction_dir = rot90( normal ) * -( rel_perp_vel >= 0. ? 1. : -1. );
+
+    const double angular_force_a_frict =
+        vec_cross(rel_a, friction_dir) * a.inv_moment_of_intertia;
+    
+    const glm::dvec2 inertia_a_frict = rot90( angular_force_a_frict * rel_a );
+
+    const double angular_force_b_frict =
+        vec_cross(rel_b, friction_dir) * b.inv_moment_of_intertia;
+    
+    const glm::dvec2 inertia_b_frict = rot90( angular_force_b_frict * rel_b );
+
+    const double angular_effect_frict = glm::dot( inertia_a_frict + inertia_b_frict, friction_dir );
+
+    const double friction_impulse_len =
+        std::min( abs(rel_perp_vel) / ( sum_inv_mass + angular_effect_frict ), max_friction_imp );
+
+    const glm::dvec2 friction_impulse = friction_dir * friction_impulse_len;
+    a.add_impulse( rel_a,-friction_impulse );
+    b.add_impulse( rel_b, friction_impulse );
 }
 
 // rozwiąż kolizję jeżeli taka zaszła

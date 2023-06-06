@@ -1,7 +1,7 @@
 /*
 Jakub Janeczko
 Renderer, czyli wyświetlanie sceny i gui
-03.06.2023
+06.06.2023
 */
 
 #include "GL3_Renderer.h"
