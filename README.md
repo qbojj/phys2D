@@ -7,7 +7,7 @@ czyli prosty silnik fizyki 2D z wizualizacją
 by otrzymać źródła:
 
 ```sh
-git clone https://github.com/qbojj/phys2D.git --recurse-submodules
+git clone --recurse-submodules --shallow-submodules https://github.com/qbojj/phys2D.git
 cd phys2D
 ```
 
