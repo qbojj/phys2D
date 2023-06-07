@@ -38,7 +38,7 @@ Wykorzystane zostały materiały:
 - obliczanie otoczki wypukłej: https://en.wikipedia.org/wiki/Graham_scan
 - obliczanie środka obiektu: https://en.wikipedia.org/wiki/Centroid
 - obliczanie momentu bezwładności obitektu: https://physics.stackexchange.com/questions/708936/how-to-calculate-the-moment-of-inertia-of-convex-polygon-two-dimensions
-- obliczanie reakcji na kolizję: https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/5collisionresponse/Physics%20-%20Collision%20Response.pdfS
+- obliczanie reakcji na kolizję: https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/physicstutorials/5collisionresponse/Physics%20-%20Collision%20Response.pdf
 
 ## Zewnętrzne biblioteki
 
