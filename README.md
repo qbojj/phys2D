@@ -49,7 +49,7 @@ Wykorzystane zostały materiały:
   - Otwieranie okna i kontekstu OpenGL: [glfw](https://github.com/glfw/glfw)
   - Gui aplikacji: [imgui](https://github.com/ocornut/imgui)
 
-### Użytkowanie
+## Użytkowanie
 
 By utworzyć nowy obiekt należy z oknie "Głównym" zaznaczyć "Menu tworzenia obiektów"
 następnie należy kliknąć punkty definiujące obiekt i kliknąć
