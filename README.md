@@ -48,3 +48,15 @@ Wykorzystane zostały materiały:
 - gui: 
   - Otwieranie okna i kontekstu OpenGL: [glfw](https://github.com/glfw/glfw)
   - Gui aplikacji: [imgui](https://github.com/ocornut/imgui)
+
+### Użytkowanie
+
+By utworzyć nowy obiekt należy z oknie "Głównym" zaznaczyć "Menu tworzenia obiektów"
+następnie należy kliknąć punkty definiujące obiekt i kliknąć
+w "Menu tworzenia" - "Utwórz".
+
+By usunąć obiekt należy kliknąć na niego i wcisnąć klawisz Delete.
+
+By włączyć wypełnianie obiektów należy kliknąć "Wypełniać obiekty?" w oknie "Głównym".
+
+By przeciągnąć obiekt, należy na niego kliknąć i przytrzymać i przesunąć myszkę od wybranego obiektu.
