@@ -64,3 +64,5 @@ By przeciągnąć obiekt, należy na niego kliknąć i przytrzymać i przesuną�
 By zmienić przyblirzenie należy użyć kółka przewijania.
 
 By przesunąć widok, należy kilknąć i przytrzynać prawy przycisk mysz i przeciągnąć myszkę.
+
+By sprawdzić parametry obiektu należy kliknąć na dany obiekt.
