@@ -4,7 +4,7 @@ czyli prosty silnik fizyki 2D z wizualizacją
 
 ## kompilacja
 
-by otrzymać źródła:
+By otrzymać źródła:
 
 ```sh
 git clone --recurse-submodules --shallow-submodules https://github.com/qbojj/phys2D.git
@@ -23,7 +23,7 @@ cmake --build . --config=Release
 
 ### Windows
 
-potrzeba zainstalować CMake oraz Visual Studio lub MinGW
+Potrzeba zainstalować CMake oraz Visual Studio lub MinGW.
 
 ```bat
 mkdir build
@@ -60,3 +60,7 @@ By usunąć obiekt należy kliknąć na niego i wcisnąć klawisz Delete.
 By włączyć wypełnianie obiektów należy kliknąć "Wypełniać obiekty?" w oknie "Głównym".
 
 By przeciągnąć obiekt, należy na niego kliknąć i przytrzymać i przesunąć myszkę od wybranego obiektu.
+
+By zmienić przyblirzenie należy użyć kółka przewijania.
+
+By przesunąć widok, należy kilknąć i przytrzynać prawy przycisk mysz i przeciągnąć myszkę.
