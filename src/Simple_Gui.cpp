@@ -157,7 +157,7 @@ Simple_Gui::handle_gui( std::vector<PhysicsObject> &objs, double dt )
 
             ImGui::SameLine();
             
-            if( ImGui::Button(u8"Wyczyść punktu") )
+            if( ImGui::Button(u8"Wyczyść punkty") )
                 point_cloud.clear();
         }
         ImGui::End();
