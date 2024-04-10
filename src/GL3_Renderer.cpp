@@ -172,9 +172,9 @@ GL3_Renderer::prepareVerts( const renderer_info &ri, const std::vector<PhysicsOb
     {
         const PhysicsObject &obj = objs[obj_i];
         
-        for( size_t i = 0; i < obj.points.size(); i++ )
+        for( glm::dvec2 pt : obj.points )
             verts.push_back( {
-                glm::vec2( obj.points[i] + obj.center ),
+                glm::vec2( pt + obj.center ),
                 ri.object_colors[obj_i]
             } );
     }
@@ -206,7 +206,7 @@ std::vector<uint32_t> GL3_Renderer::renderTriangles( const std::vector<PhysicsOb
         }
 
         indices.push_back( front_it );
-        indices.push_back( INT32_MAX ); // primitive restart index
+        indices.push_back( UINT32_MAX ); // primitive restart index
 
         offset += point_cnt;
     }
@@ -227,7 +227,7 @@ std::vector<uint32_t> GL3_Renderer::renderLines( const std::vector<PhysicsObject
             indices.push_back( i + offset );
 
         indices.push_back( offset );
-        indices.push_back( INT32_MAX ); // primitive restart index
+        indices.push_back( UINT32_MAX ); // primitive restart index
 
         offset += (uint32_t)obj.points.size();
     }
@@ -240,13 +240,13 @@ bool GL3_Renderer::draw( const renderer_info &ri,
 {
     ImGui::Render();
 
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
     int width, height;
     glfwGetFramebufferSize( window, &width, &height );
 
     glViewport( 0, 0, width, height );
     glScissor( 0, 0, width, height );
+
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     float width_half_f = width * 0.5f,
           height_half_f = height * 0.5f;
@@ -291,10 +291,10 @@ bool GL3_Renderer::draw( const renderer_info &ri,
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, verts_size, indices_size, indices.data() );
 
     glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex( INT32_MAX );
+    glPrimitiveRestartIndex(UINT32_MAX);
 
     glDrawElements(ri.fill_objects ? GL_TRIANGLE_STRIP : GL_LINE_STRIP, 
-        (GLsizei)indices_size, GL_UNSIGNED_INT, (void *)verts_size );
+        (GLsizei)indices.size(), GL_UNSIGNED_INT, (void *)verts_size );
     
     glPointSize(3);
     size_t vert_offset = object_vert_count;
